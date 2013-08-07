@@ -11,3 +11,6 @@ libraryDependencies ++= Seq(
     "com.typesafe.akka" %% "akka-testkit" % "2.2.0" % "test",
     "org.specs2" %% "specs2" % "2.1.1" % "test"
   )
+
+scalacOptions += "-J-Xss6M"
+
