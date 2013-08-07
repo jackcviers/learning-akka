@@ -1,8 +1,6 @@
 package com.github.jackcviers
 
-import akka.actor.Actor
-import akka.actor.ActorSystem
-import akka.actor.Props
+import akka.actor.{Actor, ActorSystem, Props}
 
 class BadShakespearean extends Actor {
   def receive = {
@@ -49,7 +47,7 @@ object BadShakespeareanMain {
     wood ! msg
   }
   def sendPrint() {
-    for(a ← 1 to 10) {
+    for (a ← 1 to 10) {
       printing ! a
     }
   }
