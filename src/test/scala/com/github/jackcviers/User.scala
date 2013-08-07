@@ -2,7 +2,8 @@ package com.github.jackcviers
 
 import org.specs2.Specification
 
-class UserSpec extends Specification { def is = s2"""
+class UserSpec extends Specification {
+  def is = s2"""
 
   This is a specification to check the 'User' class.
 
@@ -16,13 +17,4 @@ class UserSpec extends Specification { def is = s2"""
   def lastName = User(first, last).lastName must_== last
 
 }
-
-
-
-
-
-
-
-
-
 
