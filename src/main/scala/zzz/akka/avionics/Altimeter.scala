@@ -6,9 +6,10 @@ import scala.concurrent.duration._
 object Altimeter {
   case class AltitudeUpdate(altitude: Double)
   case class RateChange(amount: Float)
+  def apply() = new Altimeter with ProductionEventSource
 }
 
-class Altimeter extends Actor with ActorLogging with EventSource {
+class Altimeter extends Actor with ActorLogging { self: EventSource ⇒
   import Altimeter._
 
   implicit val ec = context.dispatcher
@@ -34,7 +35,7 @@ class Altimeter extends Actor with ActorLogging with EventSource {
       sendEvent(AltitudeUpdate(currentAltitudeInFeet))
   }
 
-  def receive = eventSourceRecieve orElse altimeterReceive
+  def receive = eventSourceReceive orElse altimeterReceive
 
   override def postStop() = ticker.cancel
 }
