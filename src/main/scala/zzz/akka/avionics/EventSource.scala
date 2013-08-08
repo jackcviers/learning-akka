@@ -17,7 +17,7 @@ trait EventSource { self: Actor ⇒
   }
 
   def eventSourceRecieve: Receive = {
-    case RegisterListener(listener) ⇒ listeners :+ listener
-    case UnregisterListener(listener) ⇒ listeners = listeners filterNot { _ == listener }
+    case RegisterListener(listener) ⇒ listeners = listeners :+ listener
+    case UnregisterListener(listener) ⇒ listeners = listeners filter { _ != listener }
   }
 }
