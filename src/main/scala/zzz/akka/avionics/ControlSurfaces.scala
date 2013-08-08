@@ -6,6 +6,7 @@ object ControlSurfaces {
   case class StickBack(amount: Float)
   case class StickForward(amount: Float)
 
+  def apply(altimeter: ActorRef): ControlSurfaces = new ControlSurfaces(altimeter)
 }
 
 class ControlSurfaces(altimeter: ActorRef) extends Actor {
