@@ -12,5 +12,5 @@ libraryDependencies ++= Seq(
     "org.specs2" %% "specs2" % "2.1.1" % "test"
   )
 
-scalacOptions += "-J-Xss6M"
+scalacOptions ++= Seq("-feature","-J-Xss6M")
 
