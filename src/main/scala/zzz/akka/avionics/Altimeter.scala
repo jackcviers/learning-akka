@@ -4,6 +4,7 @@ import akka.actor.{ Actor, ActorLogging }
 import scala.concurrent.duration._
 
 object Altimeter {
+  case class AltitudeUpdate(altitude: Double)
   case class RateChange(amount: Float)
 }
 
