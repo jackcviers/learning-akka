@@ -4,15 +4,6 @@ import akka.actor.{ Actor, ActorSystem }
 import akka.testkit.{ ScopedTestKit, TestActorRef, TestKitBase }
 import org.specs2.mutable.Specification
 
-class TestEventSource extends Actor with ProductionEventSource {
-  def receive = eventSourceReceive
-}
-
-trait eventSourceContext extends ScopedTestKit with TestKitBase { scope ⇒
-
-  implicit lazy val system = ActorSystem("EventSource")
-}
-
 class EventSourceSpec extends Specification {
   import EventSource._
   isolated
@@ -46,4 +37,13 @@ class EventSourceSpec extends Specification {
     expectMsg("Fibonacci")
   }
 
+}
+
+class TestEventSource extends Actor with ProductionEventSource {
+  def receive = eventSourceReceive
+}
+
+trait eventSourceContext extends ScopedTestKit with TestKitBase { scope ⇒
+
+  implicit lazy val system = ActorSystem("EventSource")
 }
