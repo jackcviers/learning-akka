@@ -4,7 +4,6 @@ import org.specs2.Specification
 
 class UserSpec extends Specification {
   def is = s2"""
-
   This is a specification to check the 'User' class.
 
   The 'User' class should
