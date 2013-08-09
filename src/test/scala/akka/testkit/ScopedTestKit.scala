@@ -1,13 +1,13 @@
 package akka.testkit
 
 import org.specs2.specification.{ After, Scope }
-import org.specs2.time.Duration
-import scala.concurrent.duration.{ Duration => ScalaDuration }
 
 trait ScopedTestKit extends Scope with After { self: TestKitBase ⇒
   import scala.language.implicitConversions
+  import scala.concurrent.duration.DurationInt
+
   lazy val shutdown = system.shutdown()
-  implicit def durationToScalaDuration(d: Duration): ScalaDuration = ScalaDuration(d.toMillis, "millis")
-  implicit def scalaDurationToDuration(s: ScalaDuration): Duration = new Duration(s.toMillis)
+  implicit def stringToDurationInt(i: String): DurationInt = new DurationInt(i.toInt)
   def after = shutdown
 }
+
