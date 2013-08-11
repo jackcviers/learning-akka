@@ -7,7 +7,7 @@ import scala.util.Random
 
 class LeadFlightAttendant extends Actor { self: AttendantCreationPolicy ⇒
   import LeadFlightAttendant._
-
+    
   override def preStart() {
     import scala.collection.JavaConverters._
 
