@@ -29,7 +29,7 @@ class PilotSpec extends Specification {
 }
 
 object TestPilot {
-  def apply(test: ActorRef) = new Pilot with PilotBehavior {
+  def apply(test: ActorRef) = new Pilot with PilotPlaneProvider {
     override def plane = test
   }
 }

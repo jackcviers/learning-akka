@@ -29,3 +29,7 @@ class Plane extends Actor with ActorLogging {
   }
 
 }
+
+trait PlaneProviderComponent {
+  def plane: ActorRef
+}
