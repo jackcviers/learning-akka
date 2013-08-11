@@ -1,10 +1,10 @@
 package zzz.akka.avionics
 
-
-import akka.actor.{ Actor, ActorLogging, Props }
+import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
 
 object Plane {
   case object GiveMeControl
+  case class Controls(controls: ActorRef)
 }
 
 class Plane extends Actor with ActorLogging {
