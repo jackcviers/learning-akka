@@ -28,26 +28,6 @@ class PlaneSpec extends Specification {
 
       a.underlyingActor.asInstanceOf[Plane].configKey must_== "zzz.akka.avionics.flightcrew"
     }
-
-    "have a pilot with the name Harry" in new planeContext(ActorSystem("TestPlane")) {
-      val a = TestActorRef[Plane]
-      a.underlyingActor.asInstanceOf[Plane].pilot.path.name must contain("Harry")
-    }
-
-    "have a copilot with the name Joan" in new planeContext(ActorSystem("TestPlane")) {
-      val a = TestActorRef[Plane]
-      a.underlyingActor.asInstanceOf[Plane].copilot.path.name must contain("Joan")
-    }
-
-    "have an autopilot with the name Autopilot" in new planeContext(ActorSystem("TestPlane")) {
-      val a = TestActorRef[Plane]
-      a.underlyingActor.asInstanceOf[Plane].autopilot.path.name must contain("Autopilot")
-    }
-
-    "have a leadFlightAttendant with the name Gizalle" in new planeContext(ActorSystem("TestPlane")) {
-      val a = TestActorRef[Plane]
-      a.underlyingActor.asInstanceOf[Plane].leadFlightAttendant.path.name must contain("Gizalle")
-    }
   }
 }
 
