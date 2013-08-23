@@ -62,16 +62,19 @@ class Plane extends Actor with ActorLogging { this: PilotProvider with Altimeter
           def childStarter = {
             context
               .actorOf(
-                Props(
-                  pilot(
-                    plane,
-                    autopilot,
-                    controls,
-                    altimeter)),
+                Props(pilot(
+                  plane,
+                  autopilot,
+                  controls,
+                  altimeter)),
                 pilotName)
             context
               .actorOf(
-                Props(copilot),
+                Props(copilot(
+                  plane,
+                  autopilot,
+                  controls,
+                  altimeter)),
                 copilotName)
           }
         }), "Pilots")
