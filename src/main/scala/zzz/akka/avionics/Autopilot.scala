@@ -6,22 +6,6 @@ class Autopilot extends Actor {
   def receive = Actor.emptyBehavior
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+object Autopilot {
+  def apply() = new Autopilot()
+}

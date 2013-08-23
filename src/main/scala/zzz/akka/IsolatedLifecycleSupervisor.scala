@@ -18,7 +18,7 @@ abstract class IsolatedResumeSupervisor(
 
 abstract class IsolatedStopSupervisor(
   maxNumberOfRetries: Int = -1,
-  within: Duration)
+  within: Duration = Duration.Inf)
   extends IsolatedLifeCycleSupervisor { self: Supervisor ⇒
   override val supervisorStrategy = strategy(maxNumberOfRetries, within) {
     case _: ActorInitializationException ⇒ Stop

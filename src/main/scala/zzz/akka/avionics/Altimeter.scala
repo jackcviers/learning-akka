@@ -3,12 +3,6 @@ package zzz.akka.avionics
 import akka.actor.{ Actor, ActorLogging }
 import scala.concurrent.duration._
 
-object Altimeter {
-  case class AltitudeUpdate(altitude: Double)
-  case class RateChange(amount: Float)
-  def apply() = new Altimeter with ProductionEventSource
-}
-
 class Altimeter extends Actor with ActorLogging { self: EventSource ⇒
   import Altimeter._
 
@@ -38,4 +32,14 @@ class Altimeter extends Actor with ActorLogging { self: EventSource ⇒
   def receive = eventSourceReceive orElse altimeterReceive
 
   override def postStop() = ticker.cancel
+}
+
+object Altimeter {
+  case class AltitudeUpdate(altitude: Double)
+  case class RateChange(amount: Float)
+  def apply(): Actor = new Altimeter with ProductionEventSource
+}
+
+trait AltimeterProvider {
+  def altimeter = Altimeter()
 }

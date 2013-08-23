@@ -1,34 +1,48 @@
 package zzz.akka.avionics
 
-import akka.actor.{ Actor, ActorLogging }
+import akka.actor.{ Actor, ActorLogging, ActorRef }
 
-class Pilot extends Actor { self: PlaneProviderComponent ⇒
+class Pilot(
+  plane: ActorRef,
+  autopilot: ActorRef,
+  var controls: ActorRef,
+  altimeter: ActorRef) extends Actor {
   import Pilot._
   import Plane.{ Controls, GiveMeControl }
 
+  var copilot = context.system.actorFor("/deadLetters")
 
-  val copilotName = context.system.settings.config.getString("zzz.akka.avionics.flightcrew.copilotName")
+  val copilotName = context
+    .system
+    .settings
+    .config
+    .getString("zzz.akka.avionics.flightcrew.copilotName")
 
-  var copilot = context.actorSelection("/deadLetters")
-  var controls = context.actorSelection("/deadLetters")
-  var autopilot = context.actorSelection("/deadLetters")
   def receive = {
     case ReadyToGo ⇒
-      copilot = context.actorSelection("../" + copilotName)
-      autopilot = context.actorSelection("../Autopilot")
       plane ! GiveMeControl
+      copilot = context.actorFor("../" + copilotName)
     case Controls(controlSurfaces) ⇒
-      controls = context.actorSelection(controlSurfaces.path)
+      controls = controlSurfaces
     case m ⇒ throw new Exception(s"Pilot doesn't understand: $m")
   }
 }
 
-
 object Pilot {
   case object ReadyToGo
-  def apply() = new Pilot with PilotPlaneProvider
+  def apply(
+    plane: ActorRef,
+    autopilot: ActorRef,
+    controls: ActorRef,
+    altimeter: ActorRef) = new Pilot(plane, autopilot, controls, altimeter)
 }
 
-trait PilotPlaneProvider extends PlaneProviderComponent { self: Actor ⇒
-  def plane = context.parent
+trait PilotProvider {
+  def pilot(
+    plane: ActorRef,
+    autopilot: ActorRef,
+    controls: ActorRef,
+    altimeter: ActorRef): Actor = Pilot(plane, autopilot, controls, altimeter)
+  def copilot: Actor = Copilot()
+  def autopilot: Actor = Autopilot()
 }

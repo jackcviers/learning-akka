@@ -2,7 +2,7 @@ package zzz.akka.avionics
 
 import akka.actor.{ Actor, ActorLogging }
 
-class Copilot extends Actor { self: PlaneProviderComponent ⇒
+class Copilot extends Actor {
   import Pilot.ReadyToGo
 
   val pilotName = context.system.settings.config.getString("zzz.akka.avionics.flightcrew.pilotName")
@@ -21,5 +21,5 @@ class Copilot extends Actor { self: PlaneProviderComponent ⇒
 }
 
 object Copilot {
-  def apply() = new Copilot with PilotPlaneProvider
+  def apply() = new Copilot
 }
