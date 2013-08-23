@@ -1,18 +1,16 @@
 package zzz.akka.avionics
 
-import akka.actor.ActorInitializationException
 import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
+import akka.actor.ActorSelection
 import akka.pattern._
 import akka.util.Timeout
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import zzz.akka.IsolatedStopSupervisor
-
-import zzz.akka.{ IsolatedResumeSupervisor, OneForOneSupervisor }
+import zzz.akka.{ IsolatedResumeSupervisor, IsolatedStopSupervisor, OneForOneSupervisor }
 
 object Plane {
   case object GiveMeControl
-  case class Controls(controls: ActorRef)
+  case class Controls(controls: ActorSelection)
 
   def apply() = new Plane with PilotProvider with AltimeterProvider with LeadFlightAttendantProvider
 }
@@ -32,7 +30,7 @@ class Plane extends Actor with ActorLogging { this: PilotProvider with Altimeter
 
   implicit val askTimeout = Timeout(1.second)
 
-  def actorForControls(name: String) = context.actorFor(s"Equipment/$name")
+  def actorForControls(name: String) = context.actorSelection(s"Equipment/$name")
 
   def startEquipment = {
     val controls = context.actorOf(
@@ -49,7 +47,7 @@ class Plane extends Actor with ActorLogging { this: PilotProvider with Altimeter
     Await.result(controls ? WaitForStart, 1.second)
   }
 
-  def actorForPilots(name: String) = context.actorFor(s"Pilots/$name")
+  def actorForPilots(name: String) = context.actorSelection(s"Pilots/$name")
 
   def startPeople = {
     val (plane, controls, autopilot, altimeter) = (
