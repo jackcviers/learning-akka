@@ -1,13 +1,15 @@
 package zzz.akka.avionics
 
+import akka.actor.ActorIdentity
 import akka.actor.ActorSelection
+import akka.actor.Identify
 import akka.actor.{ Actor, ActorLogging, ActorRef }
 
 class Pilot(
   plane: ActorRef,
   autopilot: ActorSelection,
   var controls: ActorSelection,
-  altimeter: ActorSelection) extends Actor {
+  altimeter: ActorSelection) extends Actor with ActorLogging {
   import Pilot._
   import Plane.{ Controls, GiveMeControl }
 
@@ -31,7 +33,6 @@ class Pilot(
       copilot = context.actorSelection("../" + copilotName)
     case Controls(controlSurfaces) ⇒
       controls = controlSurfaces
-    case m ⇒ throw new Exception(s"Pilot doesn't understand: $m")
   }
 }
 

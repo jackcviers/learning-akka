@@ -1,13 +1,23 @@
 package zzz.akka.avionics
 
-import akka.actor.{ Actor, ActorLogging, ActorRef, ActorSelection }
+import akka.actor.ActorLogging
+import akka.actor.PoisonPill
+import akka.actor.{
+  Actor,
+  ActorIdentity,
+  ActorLogging,
+  ActorRef,
+  ActorSelection
+}
+import akka.actor.{ Identify, Terminated }
 
 class Copilot(
   plane: ActorRef,
   autopilot: ActorSelection,
   var controls: ActorSelection,
-  altimeter: ActorSelection) extends Actor {
+  altimeter: ActorSelection) extends Actor with ActorLogging {
   import Pilot.ReadyToGo
+  import Plane.GiveMeControl
 
   val pilotName = context
     .system
@@ -20,7 +30,18 @@ class Copilot(
   def receive = {
     case ReadyToGo ⇒
       pilot = context.actorSelection("../" + pilotName)
-    case m ⇒ throw new Exception(s"Copilot dosen't understand $m")
+      log.debug(s"$pilot.path")
+      log.debug(s"identifying pilot $pilotName")
+      pilot ! Identify(None)
+    case ActorIdentity(_, Some(r)) ⇒
+      log.debug(s"identified $r")
+      context.watch(r)
+    case ActorIdentity(_, None) ⇒
+      log.debug("nobody home")
+      throw new Exception("No pilot to watch")
+    case Terminated(_) ⇒
+      log.debug("TERMINATE")
+      plane ! GiveMeControl
   }
 }
 

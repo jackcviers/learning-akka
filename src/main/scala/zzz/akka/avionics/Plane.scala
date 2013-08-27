@@ -15,7 +15,9 @@ object Plane {
   def apply() = new Plane with PilotProvider with AltimeterProvider with LeadFlightAttendantProvider
 }
 
-class Plane extends Actor with ActorLogging { this: PilotProvider with AltimeterProvider with LeadFlightAttendantProvider ⇒
+class Plane
+  extends Actor
+  with ActorLogging { this: PilotProvider with AltimeterProvider with LeadFlightAttendantProvider ⇒
   import EventSource._
   import Altimeter._
   import ControlSurfaces._
@@ -30,7 +32,8 @@ class Plane extends Actor with ActorLogging { this: PilotProvider with Altimeter
 
   implicit val askTimeout = Timeout(1.second)
 
-  def actorForControls(name: String) = context.actorSelection(s"Equipment/$name")
+  def actorForControls(name: String) = context
+    .actorSelection(s"Equipment/$name")
 
   def startEquipment = {
     val controls = context.actorOf(
@@ -100,7 +103,9 @@ class Plane extends Actor with ActorLogging { this: PilotProvider with Altimeter
     startEquipment
     startPeople
     actorForControls("Altimeter") ! RegisterListener(self)
-    actorForPilots(pilotName) :: actorForPilots(copilotName) :: Nil foreach { _ ! ReadyToGo }
+    actorForPilots(pilotName) :: actorForPilots(copilotName) :: Nil foreach {
+      _ ! ReadyToGo
+    }
   }
 
 }
