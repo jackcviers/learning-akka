@@ -1,7 +1,6 @@
 package zzz.akka.avionics
 
-import akka.actor.{ Actor, ActorLogging, ActorRef, Props }
-import akka.actor.ActorSelection
+import akka.actor.{ Actor, ActorLogging, ActorRef, ActorSelection, Props }
 import akka.pattern._
 import akka.util.Timeout
 import scala.concurrent.Await
@@ -10,6 +9,9 @@ import zzz.akka.{ IsolatedResumeSupervisor, IsolatedStopSupervisor, OneForOneSup
 
 object Plane {
   case object GiveMeControl
+  case object RequestCopilot
+  case object CopilotIdentified
+  case object PilotIdentified
   case class Controls(controls: ActorSelection)
 
   def apply() = new Plane with PilotProvider with AltimeterProvider with LeadFlightAttendantProvider
@@ -23,6 +25,7 @@ class Plane
   import ControlSurfaces._
   import Plane._
   import Pilot._
+  import Autopilot._
   import zzz.akka.IsolatedLifeCycleSupervisor.{ Started, WaitForStart }
 
   lazy val configKey = "zzz.akka.avionics.flightcrew"
@@ -31,6 +34,7 @@ class Plane
   lazy val copilotName = config.getString(s"$configKey.copilotName")
 
   implicit val askTimeout = Timeout(1.second)
+  val plane = context.self
 
   def actorForControls(name: String) = context
     .actorSelection(s"Equipment/$name")
@@ -41,7 +45,7 @@ class Plane
         new IsolatedResumeSupervisor with OneForOneSupervisor {
           def childStarter = {
             val alt = context.actorOf(Props(altimeter), "Altimeter")
-            context.actorOf(Props(autopilot), "Autopilot")
+            context.actorOf(Props(autopilot(plane)), "Autopilot")
             context.actorOf(Props(ControlSurfaces(alt)), "ControlSurfaces")
           }
 
@@ -96,7 +100,9 @@ class Plane
     case GiveMeControl ⇒
       log info ("Plane giving control.")
       sender ! Controls(actorForControls("ControlSurfaces"))
-
+    case RequestCopilot ⇒ CopilotSelection(actorForPilots(s"$copilotName"))
+    case CopilotIdentified ⇒ log debug s"Autopilot has identified the copilot"
+    case PilotIdentified ⇒ log debug s"Copilot has identified the pilot"
   }
 
   override def preStart() {

@@ -56,5 +56,5 @@ trait PilotProvider {
     autopilot: ActorSelection,
     controls: ActorSelection,
     altimeter: ActorSelection): Actor = Copilot(plane, autopilot, controls, altimeter)
-  def autopilot: Actor = Autopilot()
+  def autopilot(plane: ActorRef): Actor = Autopilot(plane)
 }

@@ -17,7 +17,7 @@ class Copilot(
   var controls: ActorSelection,
   altimeter: ActorSelection) extends Actor with ActorLogging {
   import Pilot.ReadyToGo
-  import Plane.GiveMeControl
+  import Plane.{ GiveMeControl, PilotIdentified }
 
   val pilotName = context
     .system
@@ -36,9 +36,9 @@ class Copilot(
     case ActorIdentity(_, Some(r)) ⇒
       log.debug(s"identified $r")
       context.watch(r)
+      plane ! PilotIdentified
     case ActorIdentity(_, None) ⇒
       log.debug("nobody home")
-      throw new Exception("No pilot to watch")
     case Terminated(_) ⇒
       log.debug("TERMINATE")
       plane ! GiveMeControl
