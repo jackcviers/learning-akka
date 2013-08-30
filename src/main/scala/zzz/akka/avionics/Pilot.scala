@@ -1,34 +1,60 @@
 package zzz.akka.avionics
 
-import akka.actor.{ Actor, ActorLogging }
+import akka.actor.ActorIdentity
+import akka.actor.ActorSelection
+import akka.actor.Identify
+import akka.actor.{ Actor, ActorLogging, ActorRef }
 
-class Pilot extends Actor { self: PlaneProviderComponent ⇒
+class Pilot(
+  plane: ActorRef,
+  autopilot: ActorSelection,
+  var controls: ActorSelection,
+  altimeter: ActorSelection) extends Actor with ActorLogging {
   import Pilot._
   import Plane.{ Controls, GiveMeControl }
 
+  var copilot = context.system.actorSelection("/deadLetters")
 
-  val copilotName = context.system.settings.config.getString("zzz.akka.avionics.flightcrew.copilotName")
+  // def childStarter(): Unit {}
 
-  var copilot = context.actorSelection("/deadLetters")
-  var controls = context.actorSelection("/deadLetters")
-  var autopilot = context.actorSelection("/deadLetters")
+  // override def preStart(){
+  //   childStarter()
+  // }
+
+  val copilotName = context
+    .system
+    .settings
+    .config
+    .getString("zzz.akka.avionics.flightcrew.copilotName")
+
   def receive = {
     case ReadyToGo ⇒
-      copilot = context.actorSelection("../" + copilotName)
-      autopilot = context.actorSelection("../Autopilot")
       plane ! GiveMeControl
+      copilot = context.actorSelection("../" + copilotName)
     case Controls(controlSurfaces) ⇒
-      controls = context.actorSelection(controlSurfaces.path)
-    case m ⇒ throw new Exception(s"Pilot doesn't understand: $m")
+      controls = controlSurfaces
   }
 }
 
-
 object Pilot {
   case object ReadyToGo
-  def apply() = new Pilot with PilotPlaneProvider
+  def apply(
+    plane: ActorRef,
+    autopilot: ActorSelection,
+    controls: ActorSelection,
+    altimeter: ActorSelection) = new Pilot(plane, autopilot, controls, altimeter)
 }
 
-trait PilotPlaneProvider extends PlaneProviderComponent { self: Actor ⇒
-  def plane = context.parent
+trait PilotProvider {
+  def pilot(
+    plane: ActorRef,
+    autopilot: ActorSelection,
+    controls: ActorSelection,
+    altimeter: ActorSelection): Actor = Pilot(plane, autopilot, controls, altimeter)
+  def copilot(
+    plane: ActorRef,
+    autopilot: ActorSelection,
+    controls: ActorSelection,
+    altimeter: ActorSelection): Actor = Copilot(plane, autopilot, controls, altimeter)
+  def autopilot(plane: ActorRef): Actor = Autopilot(plane)
 }

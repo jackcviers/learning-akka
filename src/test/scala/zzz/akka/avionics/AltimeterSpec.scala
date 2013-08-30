@@ -14,8 +14,6 @@ class AltimeterSpec extends Specification {
   Altimeter should
     record rate of climb changes $recordRateOfClimb
     keep rate of climb changes within bounds $keepRateOfClimbChangesWithinBounds
-    calculateAltitudeChanges $calculateAltitudeChanges
-    and sendEvents $sendEvents
 """
   }
 
@@ -29,22 +27,6 @@ class AltimeterSpec extends Specification {
     val (_, real) = actor()
     real receive RateChange(2f)
     real.currentRateOfClimbInFeetPerMinute must_== real.maxRateOfClimbInFeetPerMinute
-  }
-
-  def calculateAltitudeChanges = new altimeterContext {
-    val ref = system.actorOf(Props(Altimeter()))
-    ref ! EventSource.RegisterListener(testActor)
-    ref ! RateChange(1f)
-    fishForMessage() {
-      case AltitudeUpdate(altitude) if (altitude) == 0f ⇒ false
-      case AltitudeUpdate(altitude) ⇒ true
-    }
-  }
-
-  def sendEvents = new altimeterContext {
-    val (ref, _) = actor()
-    Await ready (EventSourceSpy.latch, "1" seconds)
-    EventSourceSpy.latch.isOpen must_== true
   }
 }
 
