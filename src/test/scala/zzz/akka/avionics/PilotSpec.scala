@@ -1,5 +1,6 @@
 package zzz.akka.avionics
 
+import akka.actor.ActorSelection
 import akka.actor.{ ActorLogging, ActorRef, ActorSystem, Props }
 import akka.testkit.{ ImplicitSender, ScopedTestKit, TestActorRef, TestKit }
 import org.specs2.mutable.Specification
@@ -12,26 +13,37 @@ class PilotSpec extends Specification {
 
   "" should {
     "respond with GiveMeControl when sent ReadyToGo" in new pilotContext(ActorSystem("TestPilot")) {
-      val a = TestActorRef(Props(TestPilot(testActor)))
+      var fakeAltimeter = system.actorSelection("/Controls/Altimeter")
+      var fakeControls = system.actorSelection("/Controls/ControlSurfaces")
+      var fakeAutopilot = system.actorSelection("/Controls/Autopilot")
 
-      a ! Pilot.ReadyToGo
+      val pilot = TestActorRef(Props(TestPilot(testActor, fakeAutopilot, fakeControls, fakeAltimeter)), "Pilot")
+      
+
+      pilot ! Pilot.ReadyToGo
       expectMsg(Plane.GiveMeControl)
     }
 
     "accept a Controls message" in new pilotContext(ActorSystem("TestPilot")) {
-      val pilot = TestActorRef(Props(TestPilot(testActor)))
-      val altimeter = TestActorRef(Props(Altimeter()))
-      val controls = TestActorRef(Props(ControlSurfaces(altimeter)))
-      pilot receive Plane.Controls(controls)
+      var fakeAltimeter = system.actorSelection("/Controls/Altimeter")
+      var fakeControls = system.actorSelection("/Controls/ControlSurfaces")
+      var fakeAutopilot = system.actorSelection("/Controls/Autopilot")
+
+      val pilot = TestActorRef(Props(TestPilot(testActor, fakeAutopilot, fakeControls, fakeAltimeter)), "Pilot")
+      val copilot = TestActorRef(Props(Copilot(testActor, fakeAutopilot, fakeControls, fakeAltimeter)), "TestPilot")
+
+      pilot receive Plane.Controls(fakeControls)
       expectNoMsg
     }
   }
 }
 
 object TestPilot {
-  def apply(test: ActorRef) = new Pilot with PilotPlaneProvider {
-    override def plane = test
-  }
+  def apply(
+    plane: ActorRef,
+    autopilot: ActorSelection,
+    controls: ActorSelection,
+    altimeter: ActorSelection) = new Pilot(plane, autopilot, controls, altimeter)
 }
 
 class pilotContext(val actorSystem: ActorSystem) extends TestKit(actorSystem) with ScopedTestKit with ImplicitSender

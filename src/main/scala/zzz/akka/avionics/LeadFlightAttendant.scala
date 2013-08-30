@@ -34,7 +34,7 @@ trait AttendantCreationPolicy {
 }
 
 trait LeadFlightAttendantProvider {
-  def newLeadFlightAttendant: Actor = LeadFlightAttendant()
+  def leadFlightAttendant: Actor = LeadFlightAttendant()
 }
 
 object LeadFlightAttendant {
