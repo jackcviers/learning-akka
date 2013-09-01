@@ -20,5 +20,6 @@ class Autopilot(plane: ActorRef) extends Actor with ActorLogging {
 
 object Autopilot {
   case class CopilotSelection(copilot: ActorSelection)
+  case object TakeControl
   def apply(plane: ActorRef) = new Autopilot(plane: ActorRef)
 }

@@ -23,6 +23,8 @@ class PlaneSpec extends Specification {
       expectNoMsg
     }
 
+    
+
     "have a configKey of zzz.akka.avionics.flightcrew" in new planeContext(ActorSystem("TestPlane")) {
       val a = TestActorRef[Plane]
 

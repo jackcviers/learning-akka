@@ -42,8 +42,8 @@ object TestPilot {
   def apply(
     plane: ActorRef,
     autopilot: ActorSelection,
-    controls: ActorSelection,
-    altimeter: ActorSelection) = new Pilot(plane, autopilot, controls, altimeter)
+    heading: ActorSelection,
+    altimeter: ActorSelection) = new Pilot(plane, autopilot, heading, altimeter) with DrinkingProvider with FlyingProvider 
 }
 
 class pilotContext(val actorSystem: ActorSystem) extends TestKit(actorSystem) with ScopedTestKit with ImplicitSender
