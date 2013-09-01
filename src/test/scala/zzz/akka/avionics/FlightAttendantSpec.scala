@@ -17,10 +17,12 @@ class FlightAttendantSpec extends Specification {
     }
 
     "assist an injured passenger" in new flightAttendantContext(ActorSystem("FlightAttendantSpec")) {
-      (for (i ← 1 to 1000) yield i) foreach { _ ⇒ flightAttendant ! GetDrink("Soda") }
-      flightAttendant ! Assist(testActor)
-      expectMsg(Drink("Magic Healing Potion."))
-    }.pendingUntilFixed
+      (for (i ← 1 to 1000) yield i) foreach { _ ⇒
+        testSender.send(flightAttendant, GetDrink("Soda"))
+      }
+      testSender.send(flightAttendant, Assist(testActor))
+      expectMsg(Drink("Magic Healing Potion"))
+    }
 
     "change drinks if the person we are currently servicing asks for a drink" in new flightAttendantContext(ActorSystem("FilghtAttendantSpec")) {
       flightAttendant ! GetDrink("Soda")
@@ -37,7 +39,7 @@ class FlightAttendantSpec extends Specification {
     "Say it is not busy while not serving other requests by responding te Busy_? with No" in new flightAttendantContext(ActorSystem("FlightAttendantSpec")) {
       flightAttendant ! Busy_?
       expectMsg(No)
-    }.pendingUntilFixed
+    }
   }
 }
 
