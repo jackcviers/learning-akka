@@ -38,4 +38,10 @@ object HeadingIndicator {
   case object Tick
   case class BankChange(amount: Float)
   case class HeadingUpdate(heading: Float)
+
+  def apply(): Actor = new HeadingIndicator with ProductionEventSource
+}
+
+trait HeadingIndicatorProvider {
+  def headingIndicator = HeadingIndicator()
 }

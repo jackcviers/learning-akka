@@ -7,19 +7,9 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import zzz.akka.{ IsolatedResumeSupervisor, IsolatedStopSupervisor, OneForOneSupervisor }
 
-object Plane {
-  case object GiveMeControl
-  case object RequestCopilot
-  case object CopilotIdentified
-  case object PilotIdentified
-  case class Controls(controls: ActorSelection)
-
-  def apply() = new Plane with PilotProvider with AltimeterProvider with LeadFlightAttendantProvider
-}
-
 class Plane
   extends Actor
-  with ActorLogging { this: PilotProvider with AltimeterProvider with LeadFlightAttendantProvider ⇒
+    with ActorLogging { this: PilotProvider with AltimeterProvider with HeadingIndicatorProvider with LeadFlightAttendantProvider ⇒
   import EventSource._
   import Altimeter._
   import ControlSurfaces._
@@ -45,10 +35,10 @@ class Plane
         new IsolatedResumeSupervisor with OneForOneSupervisor {
           def childStarter = {
             val alt = context.actorOf(Props(altimeter), "Altimeter")
+            val heading = context.actorOf(Props(headingIndicator), "HeadingIndicator")
             context.actorOf(Props(autopilot(plane)), "Autopilot")
-            context.actorOf(Props(ControlSurfaces(alt)), "ControlSurfaces")
+            context.actorOf(Props(ControlSurfaces(plane, alt, heading)), "ControlSurfaces")
           }
-
         }), "Equipment")
 
     Await.result(controls ? WaitForStart, 1.second)
@@ -114,6 +104,16 @@ class Plane
     }
   }
 
+}
+
+object Plane {
+  case object GiveMeControl
+  case object RequestCopilot
+  case object CopilotIdentified
+  case object PilotIdentified
+  case class Controls(controls: ActorSelection)
+
+  def apply() = new Plane with PilotProvider with AltimeterProvider with HeadingIndicatorProvider with LeadFlightAttendantProvider
 }
 
 trait PlaneProviderComponent {
