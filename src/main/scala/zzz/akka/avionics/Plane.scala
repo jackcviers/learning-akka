@@ -93,6 +93,7 @@ class Plane
     case RequestCopilot ⇒ CopilotSelection(actorForPilots(s"$copilotName"))
     case CopilotIdentified ⇒ log debug s"Autopilot has identified the copilot"
     case PilotIdentified ⇒ log debug s"Copilot has identified the pilot"
+    case LostControl ⇒ actorForControls("Autopilot") ! TakeControl
   }
 
   override def preStart() {
@@ -111,6 +112,7 @@ object Plane {
   case object RequestCopilot
   case object CopilotIdentified
   case object PilotIdentified
+  case object LostControl
   case class Controls(controls: ActorSelection)
 
   def apply() = new Plane with PilotProvider with AltimeterProvider with HeadingIndicatorProvider with LeadFlightAttendantProvider

@@ -15,12 +15,6 @@ class Pilot(
 
   var copilot = context.system.actorSelection("/deadLetters")
 
-  // def childStarter(): Unit {}
-
-  // override def preStart(){
-  //   childStarter()
-  // }
-
   val copilotName = context
     .system
     .settings
@@ -38,6 +32,7 @@ class Pilot(
 
 object Pilot {
   case object ReadyToGo
+  case object RelinquishControl
   def apply(
     plane: ActorRef,
     autopilot: ActorSelection,
