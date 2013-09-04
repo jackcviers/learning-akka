@@ -81,6 +81,8 @@ class FlyingBehavior(plane: ActorRef, heading: ActorRef, altimeter: ActorRef)
       stay using d.copy(status = d
         .status.copy(heading = head, headingSinceMillis = currentMillis))
     case Event(Adjust, flightData: FlightData) ⇒ stay using adjust(flightData)
+    case Event(NewBankCalculator(f), d: FlightData) ⇒ stay using d.copy(bankCalc = f)
+    case Event(NewElevatorCalculator(f), d: FlightData) ⇒ stay using d.copy(elevCalc = f)
     case Event(Terminated(_), d: FlightData) ⇒
       plane ! LostControl
       goto(Idle)
@@ -92,8 +94,8 @@ class FlyingBehavior(plane: ActorRef, heading: ActorRef, altimeter: ActorRef)
 
   def adjust(data: FlightData): FlightData = {
     val FlightData(c, elevCalc, bankCalc, t, s) = data
-    c ! elevCalc(t,s)
-    c ! bankCalc(t,s)
+    c ! elevCalc(t, s)
+    c ! bankCalc(t, s)
     data
   }
 
@@ -112,7 +114,7 @@ class FlyingBehavior(plane: ActorRef, heading: ActorRef, altimeter: ActorRef)
   def unregisterInstruments() {
     instruments foreach { _ ! UnregisterListener(self) }
   }
-  
+
   private def instruments = List(heading, altimeter)
 
   initialize
@@ -126,6 +128,8 @@ object FlyingBehavior {
   case object Idle extends State
   case object Flying extends State
   case object PreparingToFly extends State
+  case class NewElevatorCalculator(f: Calculator)
+  case class NewBankCalculator(f: Calculator)
 
   case class CourseTarget(altitude: Double, heading: Float, byMillis: Long)
   case class CourseStatus(altitude: Double, heading: Float, headingSinceMillis: Long, altitudeSinceMillis: Long)
