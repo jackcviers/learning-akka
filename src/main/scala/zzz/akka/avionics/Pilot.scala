@@ -3,6 +3,7 @@ package zzz.akka.avionics
 import akka.actor.ActorIdentity
 import akka.actor.ActorSelection
 import akka.actor.Identify
+import akka.actor.Props
 import akka.actor.{ Actor, ActorLogging, ActorRef }
 
 class Pilot(
@@ -91,4 +92,12 @@ trait PilotProvider {
     controls: ActorSelection,
     altimeter: ActorSelection): Actor = Copilot(plane, autopilot, controls, altimeter)
   def autopilot(plane: ActorRef): Actor = Autopilot(plane)
+}
+
+trait DrinkingProvider {
+  def drinkingBehavior(drinker: ActorRef) = Props(DrinkingBehavior(drinker))  
+}
+
+trait FlyingBehaviorProvider {
+  def flyingBehavior(plane: ActorRef, heading: ActorRef, altimeter: ActorRef) = Props(new FlyingBehavior(plane, heading, altimeter))
 }

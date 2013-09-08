@@ -2,7 +2,9 @@ package zzz.akka.avionics
 
 import akka.actor.ActorContext
 import akka.actor.ActorIdentity
+import akka.actor.FSM
 import akka.actor.Identify
+import akka.actor.Props
 import akka.actor.Terminated
 import akka.actor.{ Actor, ActorRef, ActorSelection, FSM }
 import akka.actor.FSM._
@@ -164,3 +166,4 @@ object FlyingBehavior {
   }
 
 }
+
