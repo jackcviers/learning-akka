@@ -31,8 +31,47 @@ class Pilot(
 }
 
 object Pilot {
+  import FlyingBehavior._
+  import ControlSurfaces._
+
   case object ReadyToGo
   case object RelinquishControl
+
+  val tipsyFactor = 1.03f
+  val zaphodFactor = 1f
+
+  val tipsyCalcElevator: Calculator = { (target, status) ⇒
+    calcElevator(target, status) match {
+      case StickForward(amt) ⇒ StickForward(amt * tipsyFactor)
+      case StickBack(amt) ⇒ StickBack(amt * tipsyFactor)
+      case m ⇒ m
+    }
+  }
+
+  val tipsyCalcAilerons: Calculator = { (target, status) ⇒
+    calcAilerons(target, status) match {
+      case StickLeft(amt) ⇒ StickLeft(amt * tipsyFactor)
+      case StickRight(amt) ⇒ StickRight(amt * tipsyFactor)
+      case m ⇒ m
+    }
+  }
+
+  val zaphodCalcElevator: Calculator = { (target, status) ⇒
+    calcElevator(target, status) match {
+      case StickForward(_) ⇒ StickForward(zaphodFactor)
+      case StickBack(_) ⇒ StickBack(zaphodFactor)
+      case m ⇒ m
+    }
+  }
+
+  val zaphodCalcAilerons: Calculator = { (target, status) ⇒
+    calcAilerons(target, status) match {
+      case StickLeft(_) ⇒ StickLeft(zaphodFactor)
+      case StickRight(_) ⇒ StickRight(zaphodFactor)
+      case m ⇒ m
+    }
+  }
+
   def apply(
     plane: ActorRef,
     autopilot: ActorSelection,
