@@ -11,7 +11,7 @@ import akka.actor.FSM._
 import scala.concurrent.duration._
 import scala.math.{ abs, signum }
 
-class FlyingBehavior(plane: ActorRef, heading: ActorRef, altimeter: ActorRef)
+class FlyingBehavior(plane: ActorRef, heading: ActorSelection, altimeter: ActorSelection)
   extends Actor
   with FSM[FlyingBehavior.State, FlyingBehavior.Data] {
   import FlyingBehavior._
