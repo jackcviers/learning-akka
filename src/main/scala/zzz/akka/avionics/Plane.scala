@@ -7,19 +7,9 @@ import scala.concurrent.Await
 import scala.concurrent.duration._
 import zzz.akka.{ IsolatedResumeSupervisor, IsolatedStopSupervisor, OneForOneSupervisor }
 
-object Plane {
-  case object GiveMeControl
-  case object RequestCopilot
-  case object CopilotIdentified
-  case object PilotIdentified
-  case class Controls(controls: ActorSelection)
-
-  def apply() = new Plane with PilotProvider with AltimeterProvider with LeadFlightAttendantProvider
-}
-
 class Plane
   extends Actor
-  with ActorLogging { this: PilotProvider with AltimeterProvider with LeadFlightAttendantProvider ⇒
+  with ActorLogging { this: PilotProvider with AltimeterProvider with HeadingIndicatorProvider with LeadFlightAttendantProvider ⇒
   import EventSource._
   import Altimeter._
   import ControlSurfaces._
@@ -45,10 +35,10 @@ class Plane
         new IsolatedResumeSupervisor with OneForOneSupervisor {
           def childStarter = {
             val alt = context.actorOf(Props(altimeter), "Altimeter")
+            val heading = context.actorOf(Props(headingIndicator), "HeadingIndicator")
             context.actorOf(Props(autopilot(plane)), "Autopilot")
-            context.actorOf(Props(ControlSurfaces(alt)), "ControlSurfaces")
+            context.actorOf(Props(ControlSurfaces(plane, alt, heading)), "ControlSurfaces")
           }
-
         }), "Equipment")
 
     Await.result(controls ? WaitForStart, 1.second)
@@ -57,11 +47,12 @@ class Plane
   def actorForPilots(name: String) = context.actorSelection(s"Pilots/$name")
 
   def startPeople = {
-    val (plane, controls, autopilot, altimeter) = (
+    val (plane, controls, autopilot, altimeter, heading) = (
       self,
       actorForControls("ControlSurfaces"),
       actorForControls("Autopilot"),
-      actorForControls("Altimeter"))
+      actorForControls("Altimeter"),
+      actorForControls("HeadingIndicator"))
 
     val people = context.actorOf(
       Props(
@@ -72,7 +63,7 @@ class Plane
                 Props(pilot(
                   plane,
                   autopilot,
-                  controls,
+                  heading,
                   altimeter)),
                 pilotName)
             context
@@ -103,6 +94,7 @@ class Plane
     case RequestCopilot ⇒ CopilotSelection(actorForPilots(s"$copilotName"))
     case CopilotIdentified ⇒ log debug s"Autopilot has identified the copilot"
     case PilotIdentified ⇒ log debug s"Copilot has identified the pilot"
+    case LostControl ⇒ actorForControls("Autopilot") ! TakeControl
   }
 
   override def preStart() {
@@ -114,6 +106,17 @@ class Plane
     }
   }
 
+}
+
+object Plane {
+  case object GiveMeControl
+  case object RequestCopilot
+  case object CopilotIdentified
+  case object PilotIdentified
+  case object LostControl
+  case class Controls(controls: ActorSelection)
+
+  def apply() = new Plane with PilotProvider with AltimeterProvider with HeadingIndicatorProvider with LeadFlightAttendantProvider
 }
 
 trait PlaneProviderComponent {
