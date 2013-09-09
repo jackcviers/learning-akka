@@ -9,7 +9,7 @@ import zzz.akka.{ IsolatedResumeSupervisor, IsolatedStopSupervisor, OneForOneSup
 
 class Plane
   extends Actor
-    with ActorLogging { this: PilotProvider with AltimeterProvider with HeadingIndicatorProvider with LeadFlightAttendantProvider ⇒
+  with ActorLogging { this: PilotProvider with AltimeterProvider with HeadingIndicatorProvider with LeadFlightAttendantProvider ⇒
   import EventSource._
   import Altimeter._
   import ControlSurfaces._
@@ -47,11 +47,12 @@ class Plane
   def actorForPilots(name: String) = context.actorSelection(s"Pilots/$name")
 
   def startPeople = {
-    val (plane, controls, autopilot, altimeter) = (
+    val (plane, controls, autopilot, altimeter, heading) = (
       self,
       actorForControls("ControlSurfaces"),
       actorForControls("Autopilot"),
-      actorForControls("Altimeter"))
+      actorForControls("Altimeter"),
+      actorForControls("HeadingIndicator"))
 
     val people = context.actorOf(
       Props(
@@ -62,7 +63,7 @@ class Plane
                 Props(pilot(
                   plane,
                   autopilot,
-                  controls,
+                  heading,
                   altimeter)),
                 pilotName)
             context
